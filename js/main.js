@@ -1,10 +1,5 @@
 'use strict';
 
-// お問い合わせ設定：メールの送受信を確認してから true にしてください。
-// false の間はアドレス・メールリンクを表示しません。
-const CONTACT_ENABLED = false;
-const CONTACT_EMAIL = 'info@ri-n1.com';
-
 const toggle = document.querySelector('.menu-toggle');
 const navigation = document.querySelector('#site-nav');
 const mobileQuery = window.matchMedia('(max-width: 760px)');
@@ -36,11 +31,29 @@ if (toggle && navigation) {
   mobileQuery.addEventListener('change', closeMenu);
 }
 
-const emailLink = document.querySelector('#contact-email');
-if (CONTACT_ENABLED && emailLink) {
-  document.querySelector('#contact-status').textContent = 'メールでお問い合わせください。';
-  document.querySelector('#contact-note').textContent = 'ボタンを押すと、お使いのメールアプリが開きます。';
-  emailLink.href = `mailto:${CONTACT_EMAIL}`;
-  emailLink.textContent = `${CONTACT_EMAIL} ↗`;
-  emailLink.hidden = false;
+// 入力画面はHP独自のデザイン。確認・送信結果は同ページ内のフレームに表示。
+// 外部ページの内容は読み取らず、送信成功を推測して表示しません。
+const contactForm = document.querySelector('#rin-contact-form');
+const resultPanel = document.querySelector('#rin-contact-result-panel');
+if (contactForm && resultPanel) {
+  contactForm.addEventListener('submit', () => {
+    resultPanel.hidden = false;
+    contactForm.hidden = true;
+    document.querySelector('#rin-result-heading').focus();
+    resultPanel.scrollIntoView({ block: 'start', behavior: 'auto' });
+  });
+  document.querySelector('#rin-contact-edit').addEventListener('click', () => {
+    resultPanel.hidden = true;
+    contactForm.hidden = false;
+    document.querySelector('#contact-sei').focus();
+  });
+}
+
+// 送信先の確認画面・完了画面の切り替え時はフレーム先頭を表示。
+// loadだけで送信成功と判定しないこと。
+const resultFrame = document.querySelector('iframe[name="rin-contact-result"]');
+if (resultFrame && resultPanel) {
+  resultFrame.addEventListener('load', () => {
+    if (!resultPanel.hidden) resultPanel.scrollIntoView({ block: 'start', behavior: 'auto' });
+  });
 }
